@@ -602,6 +602,33 @@ function escapeHTML(text) {
 }
 
 render();
+async function analyzeFoodPhoto(imageBase64, mimeType = "image/jpeg") {
+  try {
+    const response = await fetch(
+      "https://white-smoke-123f.v-karlla.workers.dev/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          image: imageBase64,
+          mimeType: mimeType
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("AI analiza nije uspjela");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Greška AI analize:", error);
+    alert("Nije uspjelo analizirati fotografiju. Pokušaj ponovno.");
+    return null;
+  }
+}    
 
 </script>
 
