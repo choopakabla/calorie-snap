@@ -1,28 +1,609 @@
-TVOJ AI DNEVNIK
-Calorie Snap
-🍏
-Današnji unos
-0 kcal
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calorie Snap</title>
 
-0 kcal
-Cilj: 2000 kcal
-🥩 Proteini 0 g
-🍞 Ugljikohidrati 0 g
-🥑 Masti 0 g
-📸 Fotografiraj obrok
-Uslikaj hranu ili proizvod. AI će pokušati prepoznati sastojke i procijeniti porciju.
-📷 Otvori kameru / fotografiju
-⚡ Brzi unos
-🍌 Banana
-🍎 Jabuka
-☕ Kava
-🥛 Jogurt
-🥐 Kroasan
-🥤 Shake
-🍽️ Današnji obroci
-Obriši dan
-Još nema unesenih obroka.
-🎯 Dnevni cilj
-Kalorijski ciljSpremi cilj
-AI procjene su približne, osobito za miješana jela i nepoznate porcije. Pregledaj i ispravi rezultat prije dodavanja. API ključ je na serveru, nikad u ovom HTML-u.
-Calorie Snap · Jednostavniji pregled prehrane 🌿
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f4f7f1;
+    color: #263b30;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    padding: 20px 0;
+}
+
+header h1 {
+    font-size: 30px;
+    margin: 0;
+}
+
+header p {
+    color: #7b8b80;
+    margin-top: 8px;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.calorie-box {
+    background: linear-gradient(135deg, #d9f4df, #effaf0);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+}
+
+.calorie-box .number {
+    font-size: 48px;
+    font-weight: 800;
+    color: #247447;
+}
+
+.progress {
+    height: 12px;
+    background: #dce8df;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #45a66a;
+    border-radius: 20px;
+    transition: width 0.3s;
+}
+
+.macros {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.macro {
+    background: white;
+    padding: 14px 8px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.macro strong {
+    display: block;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+.protein { color: #d66b55; }
+.carbs { color: #d5a13b; }
+.fat { color: #6a9b68; }
+
+h2 {
+    font-size: 20px;
+    margin-top: 0;
+}
+
+button {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.quick-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.quick-button {
+    background: #f1f7f1;
+    color: #294b35;
+    text-align: left;
+    padding: 15px;
+}
+
+.quick-button:hover {
+    background: #dcefe0;
+}
+
+.quick-button span {
+    display: block;
+    margin-top: 5px;
+    font-size: 13px;
+    color: #829087;
+}
+
+form {
+    display: grid;
+    gap: 12px;
+}
+
+input, select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #dce4dd;
+    border-radius: 12px;
+    font-size: 16px;
+    background: white;
+}
+
+.add-button {
+    background: #318451;
+    color: white;
+}
+
+.photo-button {
+    display: block;
+    text-align: center;
+    background: #edf5ee;
+    color: #34784a;
+    padding: 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.photo-button input {
+    display: none;
+}
+
+#photoPreview {
+    max-width: 100%;
+    border-radius: 15px;
+    margin-top: 12px;
+    display: none;
+}
+
+.food-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid #edf0ed;
+}
+
+.food-item:last-child {
+    border-bottom: none;
+}
+
+.food-info {
+    flex: 1;
+}
+
+.food-info small {
+    color: #849087;
+    display: block;
+    margin-top: 4px;
+}
+
+.delete-button {
+    background: #fff0ed;
+    color: #cf5948;
+    padding: 8px 12px;
+}
+
+.goal-input {
+    display: flex;
+    gap: 10px;
+}
+
+.goal-input button {
+    background: #318451;
+    color: white;
+    white-space: nowrap;
+}
+
+.empty {
+    text-align: center;
+    color: #9aa59c;
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #96a199;
+    font-size: 13px;
+}
+
+@media (max-width: 450px) {
+    .container {
+        padding: 12px;
+    }
+
+    .quick-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .calorie-box .number {
+        font-size: 40px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <h1>🍏 Calorie Snap</h1>
+    <p>Jednostavniji pregled prehrane</p>
+</header>
+
+<div class="card calorie-box">
+    <p>🍎 Današnji unos</p>
+    <div class="number"><span id="totalCalories">0</span> kcal</div>
+
+    <p>
+        <span id="remainingCalories">2000</span> kcal preostalo
+    </p>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <p>Cilj: <span id="goalDisplay">2000</span> kcal</p>
+</div>
+
+<div class="macros">
+
+    <div class="macro">
+        <span class="protein">🥩 Proteini</span>
+        <strong id="totalProtein">0 g</strong>
+    </div>
+
+    <div class="macro">
+        <span class="carbs">🍞 Ugljikohidrati</span>
+        <strong id="totalCarbs">0 g</strong>
+    </div>
+
+    <div class="macro">
+        <span class="fat">🥑 Masti</span>
+        <strong id="totalFat">0 g</strong>
+    </div>
+
+</div>
+
+<div class="card">
+    <h2>🎯 Dnevni cilj</h2>
+
+    <div class="goal-input">
+        <input type="number" id="goalInput" value="2000" min="500">
+        <button onclick="saveGoal()">Spremi</button>
+    </div>
+</div>
+
+<div class="card">
+    <h2>📸 Fotografiraj obrok</h2>
+
+    <p style="color:#849087">
+        Odaberi fotografiju hrane ili fotografiraj obrok.
+    </p>
+
+    <label class="photo-button">
+        📷 Otvori kameru / fotografiju
+        <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onchange="previewPhoto(event)"
+        >
+    </label>
+
+    <img id="photoPreview" alt="Fotografija obroka">
+
+    <p style="font-size:13px;color:#8b978d">
+        Fotografija se trenutno prikazuje samo kao pregled.
+        AI analiza hrane još nije povezana.
+    </p>
+</div>
+
+<div class="card">
+    <h2>⚡ Brzi unos</h2>
+
+    <div class="quick-buttons">
+
+        <button class="quick-button" onclick="addFood('Banana',105,1.3,27,0.4)">
+            🍌 Banana
+            <span>105 kcal</span>
+        </button>
+
+        <button class="quick-button" onclick="addFood('Jabuka',95,0.5,25,0.3)">
+            🍎 Jabuka
+            <span>95 kcal</span>
+        </button>
+
+        <button class="quick-button" onclick="addFood('Kava',5,0,1,0)">
+            ☕ Kava
+            <span>5 kcal</span>
+        </button>
+
+        <button class="quick-button" onclick="addFood('Jogurt',120,6,10,5)">
+            🥛 Jogurt
+            <span>120 kcal</span>
+        </button>
+
+        <button class="quick-button" onclick="addFood('Kroasan',230,5,27,12)">
+            🥐 Kroasan
+            <span>230 kcal</span>
+        </button>
+
+        <button class="quick-button" onclick="addFood('Shake',180,25,15,3)">
+            🥤 Shake
+            <span>180 kcal</span>
+        </button>
+
+    </div>
+</div>
+
+<div class="card">
+    <h2>➕ Dodaj obrok</h2>
+
+    <form id="foodForm">
+
+        <input
+            type="text"
+            id="foodName"
+            placeholder="Naziv hrane"
+            required
+        >
+
+        <input
+            type="number"
+            id="foodCalories"
+            placeholder="Kalorije (kcal)"
+            min="0"
+            required
+        >
+
+        <input
+            type="number"
+            id="foodProtein"
+            placeholder="Proteini (g)"
+            min="0"
+            value="0"
+        >
+
+        <input
+            type="number"
+            id="foodCarbs"
+            placeholder="Ugljikohidrati (g)"
+            min="0"
+            value="0"
+        >
+
+        <input
+            type="number"
+            id="foodFat"
+            placeholder="Masti (g)"
+            min="0"
+            value="0"
+        >
+
+        <button class="add-button" type="submit">
+            Dodaj obrok
+        </button>
+
+    </form>
+</div>
+
+<div class="card">
+    <h2>🍽️ Današnji obroci</h2>
+
+    <div id="foodList">
+        <div class="empty">Još nema unesenih obroka.</div>
+    </div>
+
+    <button
+        onclick="clearDay()"
+        style="background:#fff0ed;color:#cf5948;width:100%;margin-top:15px"
+    >
+        🗑️ Obriši dan
+    </button>
+</div>
+
+<footer>
+    Calorie Snap 🍃
+</footer>
+
+</div>
+
+<script>
+
+let foods = JSON.parse(localStorage.getItem("calorieSnapFoods")) || [];
+
+let goal = Number(localStorage.getItem("calorieSnapGoal")) || 2000;
+
+document.getElementById("goalInput").value = goal;
+
+function saveData() {
+    localStorage.setItem("calorieSnapFoods", JSON.stringify(foods));
+    localStorage.setItem("calorieSnapGoal", goal);
+}
+
+function addFood(name, calories, protein, carbs, fat) {
+
+    foods.push({
+        name: name,
+        calories: Number(calories),
+        protein: Number(protein),
+        carbs: Number(carbs),
+        fat: Number(fat)
+    });
+
+    saveData();
+    render();
+}
+
+document.getElementById("foodForm").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const name = document.getElementById("foodName").value;
+    const calories = document.getElementById("foodCalories").value;
+    const protein = document.getElementById("foodProtein").value;
+    const carbs = document.getElementById("foodCarbs").value;
+    const fat = document.getElementById("foodFat").value;
+
+    addFood(name, calories, protein, carbs, fat);
+
+    this.reset();
+
+    document.getElementById("foodProtein").value = 0;
+    document.getElementById("foodCarbs").value = 0;
+    document.getElementById("foodFat").value = 0;
+});
+
+function deleteFood(index) {
+    foods.splice(index, 1);
+    saveData();
+    render();
+}
+
+function saveGoal() {
+
+    const newGoal = Number(document.getElementById("goalInput").value);
+
+    if (newGoal >= 500) {
+        goal = newGoal;
+        saveData();
+        render();
+    } else {
+        alert("Unesi ispravan kalorijski cilj.");
+    }
+}
+
+function clearDay() {
+
+    if (confirm("Želiš li obrisati sve današnje obroke?")) {
+        foods = [];
+        saveData();
+        render();
+    }
+}
+
+function previewPhoto(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const preview = document.getElementById("photoPreview");
+
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+}
+
+function render() {
+
+    const totalCalories = foods.reduce((sum, food) => sum + food.calories, 0);
+
+    const totalProtein = foods.reduce((sum, food) => sum + food.protein, 0);
+
+    const totalCarbs = foods.reduce((sum, food) => sum + food.carbs, 0);
+
+    const totalFat = foods.reduce((sum, food) => sum + food.fat, 0);
+
+    const remaining = goal - totalCalories;
+
+    document.getElementById("totalCalories").textContent = totalCalories;
+
+    document.getElementById("remainingCalories").textContent = remaining;
+
+    document.getElementById("goalDisplay").textContent = goal;
+
+    document.getElementById("totalProtein").textContent =
+        Math.round(totalProtein) + " g";
+
+    document.getElementById("totalCarbs").textContent =
+        Math.round(totalCarbs) + " g";
+
+    document.getElementById("totalFat").textContent =
+        Math.round(totalFat) + " g";
+
+    document.getElementById("progressBar").style.width =
+        Math.min((totalCalories / goal) * 100, 100) + "%";
+
+    const foodList = document.getElementById("foodList");
+
+    if (foods.length === 0) {
+
+        foodList.innerHTML =
+            '<div class="empty">Još nema unesenih obroka.</div>';
+
+        return;
+    }
+
+    foodList.innerHTML = foods.map((food, index) => `
+
+        <div class="food-item">
+
+            <div class="food-info">
+
+                <strong>${escapeHTML(food.name)}</strong>
+
+                <small>
+                    ${food.calories} kcal ·
+                    P ${food.protein} g ·
+                    UH ${food.carbs} g ·
+                    M ${food.fat} g
+                </small>
+
+            </div>
+
+            <button
+                class="delete-button"
+                onclick="deleteFood(${index})"
+            >
+                ✕
+            </button>
+
+        </div>
+
+    `).join("");
+}
+
+function escapeHTML(text) {
+    return String(text).replace(/[&<>"']/g, function(character) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        }[character];
+    });
+}
+
+render();
+
+</script>
+
+</body>
+</html>
